@@ -8,7 +8,7 @@ class Client:
 
     tous = []
     discussionOuverte = [] # Qui est autorisé à parler avec qui - 0: client, 1: client
-
+    propositionFichiers = [] # TODO : contient ClientEmetteur, ClientRecepteur, Chemin du fichier
 
     def __init__(self, pconn):
 
@@ -54,13 +54,15 @@ class Client:
             data = ' '.join(tmpData.split())
             commande = data.split(" ")[0]
             # todo message de retour + utilisateur existant
+            if commande == "/quit": break
+
             if commande == "/newname":
                 name = data[len(commande)+1:]
                 if re.match("^\w{3,15}$", name):
                     self.nom = name
                     self.initco()
                     break
-
+            else: self.conn.sendall("ERR_NO_NICKNAME")
         if disconnected:
             self.conn.close()
 
@@ -78,7 +80,7 @@ class Client:
 
             if data == "/quit":
                 self.conn.sendall("SUCCESSFUL_LOGOUT")
-                break #on ferme le socket
+                break
 
             if data[0] == '/': #c'est une commande spéciale
                 reponse = self.getReply(data[1:])
