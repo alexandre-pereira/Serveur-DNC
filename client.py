@@ -28,7 +28,7 @@ class Client:
         clientListAway = ""
         for c in Client.tous:
             if not c.actif:
-                clientList += " " + c.nom
+                clientListAway += " " + c.nom
                 c.conn.sendall("HAS_JOIN "+ self.nom)
 
         Client.tous.append(self)
