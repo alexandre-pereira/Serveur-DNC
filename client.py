@@ -7,7 +7,7 @@ from logger import Logger
 class Client:
 
     tous = []
-    discussionOuverte = [] # 0: client, 1: client
+    discussionOuverte = [] # Qui est autorisé à parler avec qui - 0: client, 1: client
 
 
     def __init__(self, pconn):
@@ -134,6 +134,7 @@ class Client:
 
         if(commande == "acceptpm"):
             dest = Client.getByName(argument.split(" ")[0])
+            # todo les 2 on fait un accept
             if dest:
                 d = self.getDiscussionEnAttenteFrom(dest)
                 if d:
@@ -156,18 +157,32 @@ class Client:
 
         if(commande == "enable"):
             self.actif = True
+            for c in Client.tous:
+                if c != self:
+                    c.conn.sendall("IS_NOW_ENABLE "+self.nom)
             return "SUCC_ENABLED"
-
         if(commande == "disable"):
             self.actif = False
+            for c in Client.tous:
+                if c != self:
+                    c.conn.sendall("IS_NOW_DISABLE "+self.nom)
             return "SUCC_DISABLED"
 
         if(commande == "pmfile"):
+
             dest = Client.getByName(argument.split(" ")[0])
             if dest:
                 dest.conn.sendall("NEW_FILE_REQUEST "+self.nom)
                 return "SUCC_PMFILE"
             return "ERR_DEST_NOT_FOUND"
+
+
+
+
+
+
+
+
         return "COMMAND_NOT_FOUND"
 
     @staticmethod
