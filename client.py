@@ -33,7 +33,7 @@ class Client:
 
         Client.tous.append(self)
 
-        self.conn.sendall("CHANNEL_JOINED_AS " + self.nom)
+        self.conn.sendall("SUCC_CHANNEL_JOINED")
         self.conn.sendall("USERLIST" + clientList)
         self.conn.sendall("USERLISTAWAY" + clientListAway)
         start_new_thread(self.client_thread, ())
@@ -87,7 +87,7 @@ class Client:
             else: #c'est un message à envoyer à tous les clients actifs
                 for c in Client.tous:
                     if c!=self: c.conn.sendall("NEW_MSG "+ self.nom + " " + data)
-                reponse = "SUCCESSFUL_MESSAGE_SENDED"
+                reponse = "SUCC_MESSAGE_SENDED"
 
             if reponse:
                 self.conn.sendall(reponse)
@@ -172,18 +172,23 @@ class Client:
 
         if(commande == "pmfile"):
 
-            dest = Client.getByName(argument.split(" ")[0])
+            arguments = argument.split(" ")
+            dest = Client.getByName(arguments[0])
+            path = Client.getByName(arguments[1])
+
+            if dest and path: Client.propositionFichiers.append([self, dest, path])
+
             if dest:
                 dest.conn.sendall("NEW_FILE_REQUEST "+self.nom)
                 return "SUCC_PMFILE"
             return "ERR_DEST_NOT_FOUND"
 
-
-
-
-
-
-
+        if(commande == "acceptfile"):
+            arguments = argument.split(" ")
+            dest = Client.getByName(arguments[0])
+            path = Client.getByName(arguments[1])
+            port = Client.getByName(arguments[2])
+            # Client.propositionFichiers.remove(..)
 
         return "COMMAND_NOT_FOUND"
 
@@ -193,12 +198,11 @@ class Client:
             if c.nom == nom: return c
         return None
 
-    @staticmethod
-    def genererNom():
-        cpt=1
-        while Client.getByName("Anonyme"+str(cpt)):
-            cpt = cpt + 1
-        return "Anonyme"+str(cpt)
+    def getProposedFile(self, emet, path):
+        for p in Client.propositionFichiers:
+            if p[0] == emet and p[1] == self and p[2] == path:
+                return p
+        return None
 
     @staticmethod
     def isDiscussionOuverte(c1, c2):
