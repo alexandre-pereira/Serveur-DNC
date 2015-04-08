@@ -158,6 +158,7 @@ class Client:
                 if d:
                     self.discussionEnAttente.remove(dest)
                     # todo arreter une connexion deja ouverte
+                    d.conn.sendall("PRIVATE_DISCU_REFUSED_FROM" + self.nom)
                     return "SUCCESSFUL_REFUSED"
                 return "ERR_NO_INVITATION_FOUND"
             return "ERR_DEST_NOT_FOUND"
