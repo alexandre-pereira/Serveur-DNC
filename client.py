@@ -58,6 +58,9 @@ class Client:
 
             if commande == "/newname":
                 name = data[len(commande)+1:]
+                if Client.getByName(name) != None:
+                    self.conn.sendall("ERR_NICKNAME_ALREADY_USED")
+                    continue
                 if re.match("^\w{3,15}$", name):
                     self.nom = name
                     self.initco()
@@ -120,7 +123,7 @@ class Client:
             if dest:
                 if not Client.isDiscussionOuverte(dest, self): return "ERR_CONV_NOT_ALLOWED"
                 dest.conn.sendall("NEW_PM "+ self.nom + " " + argument[len(dest.nom)+1:])
-                return "SUCC_PM_SENDED " +  data.split(" ")[1] + " " +  data.split(" ")[2]
+                return "SUCC_PM_SENDED"
             return "ERR_DEST_NOT_FOUND"
 
         if(commande == "askpm"):
@@ -142,6 +145,8 @@ class Client:
                 if d:
                     self.discussionEnAttente.remove(dest)
                     Client.discussionOuverte.append([self, dest])
+                    #todo envoyer un message à l'autre
+                    d.conn.sendall("PRIVATE_DISCU_ACCEPTED_FROM" + self.nom)
                     return "SUCCESSFUL_ACCEPTED"
                 return "ERR_NO_INVITATION_FOUND"
             return "ERR_DEST_NOT_FOUND"
