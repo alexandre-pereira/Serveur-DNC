@@ -180,12 +180,11 @@ class Client:
 
             arguments = argument.split(" ")
             dest = Client.getByName(arguments[0])
-            path = Client.getByName(arguments[1])
-
-            if dest and path: Client.propositionFichiers.append([self, dest, path])
-
-            if dest:
-                dest.conn.sendall("NEW_FILE_REQUEST "+self.nom)
+            path = argument[len(Client.getByName(arguments[0]))+1:]
+            # todo : already proposed this file
+            if dest and path:
+                Client.propositionFichiers.append([self, dest, path])
+                dest.conn.sendall("NEW_FILE_REQUEST "+self.nom + " "+path)
                 return "SUCC_PMFILE"
             return "ERR_DEST_NOT_FOUND"
 
@@ -194,7 +193,10 @@ class Client:
             dest = Client.getByName(arguments[0])
             path = Client.getByName(arguments[1])
             port = Client.getByName(arguments[2])
+            if Client.propositionFichiers.pop([Client.propositionFichiers.index([dest, self, path])]):
+                return "START_TRANSFERT PERSON FILE"
             # Client.propositionFichiers.remove(..)
+            return "SUCC_ACCEPTED_FILE"
 
         return "COMMAND_NOT_FOUND"
 
