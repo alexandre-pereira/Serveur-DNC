@@ -19,23 +19,11 @@ class Client:
         start_new_thread(self.wait4name, ())
 
     def initco(self):
-        clientList = ""
         for c in Client.tous:
-            if c.actif:
-                clientList += " " + c.nom
-                c.conn.sendall("HAS_JOIN "+ self.nom)
-
-        clientListAway = ""
-        for c in Client.tous:
-            if not c.actif:
-                clientListAway += " " + c.nom
-                c.conn.sendall("HAS_JOIN "+ self.nom)
+            c.conn.sendall("302 "+ self.nom)
 
         Client.tous.append(self)
-
-        self.conn.sendall("SUCC_CHANNEL_JOINED")
-        self.conn.sendall("USERLIST" + clientList)
-        self.conn.sendall("USERLISTAWAY" + clientListAway)
+        self.conn.sendall("200")
         start_new_thread(self.client_thread, ())
 
     def wait4name(self):
@@ -59,13 +47,14 @@ class Client:
             if commande == "/newname":
                 name = data[len(commande)+1:]
                 if Client.getByName(name) != None:
-                    self.conn.sendall("ERR_NICKNAME_ALREADY_USED")
+                    self.conn.sendall("400")
                     continue
                 if re.match("^\w{3,15}$", name):
                     self.nom = name
                     self.initco()
                     break
-            else: self.conn.sendall("ERR_NO_NICKNAME")
+                else: self.conn.sendall("408")
+            else: self.conn.sendall("401")
         if disconnected:
             self.conn.close()
 
@@ -82,15 +71,15 @@ class Client:
             Logger.logger.info(self.nom +" :: " +data)
 
             if data == "/quit":
-                self.conn.sendall("SUCCESSFUL_LOGOUT")
+                self.conn.sendall("201")
                 break
 
             if data[0] == '/': #c'est une commande spéciale
                 reponse = self.getReply(data[1:])
             else: #c'est un message à envoyer à tous les clients actifs
                 for c in Client.tous:
-                    if c!=self: c.conn.sendall("NEW_MSG "+ self.nom + " " + data)
-                reponse = "SUCC_MESSAGE_SENDED"
+                    if c!=self: c.conn.sendall("304 "+ self.nom + " " + data)
+                reponse = "202"
 
             if reponse:
                 self.conn.sendall(reponse)
@@ -99,9 +88,9 @@ class Client:
         #EXIT
         Client.tous.remove(self)
         for c in Client.tous:
-            c.conn.sendall("HAS_LEFT "+ self.nom)
+            c.conn.sendall("303 "+ self.nom)
         self.conn.close()
-
+        # todo: nettoyer listes transfert fichiers + acceptpm
 
 
     def getReply(self, data):
@@ -109,22 +98,22 @@ class Client:
         argument = data[len(commande)+1:]
         if(commande == "name"):
             if re.match("^\w{3,15}$", argument):
-                if Client.getByName(argument): return "ERR_NICKNAME_ALREADY_USED"
+                if Client.getByName(argument): return "400"
                 ancienNom = self.nom
                 self.nom = argument
                 for c in Client.tous:
                     if c != self:
-                        c.conn.sendall("NAME_CHANGED "+ancienNom+" "+self.nom)
-                return "SUCC_NICKNAME_CHANGED_TO " + self.nom
-            return "ERR_INVALID_NICKNAME"
+                        c.conn.sendall("305 "+ancienNom+" "+self.nom)
+                return "203 " + self.nom
+            return "408"
 
         if(commande == "pm"):
             dest = Client.getByName(argument.split(" ")[0])
             if dest:
-                if not Client.isDiscussionOuverte(dest, self): return "ERR_CONV_NOT_ALLOWED"
-                dest.conn.sendall("NEW_PM "+ self.nom + " " + argument[len(dest.nom)+1:])
-                return "SUCC_PM_SENDED"
-            return "ERR_DEST_NOT_FOUND"
+                if not Client.isDiscussionOuverte(dest, self): return "402"
+                dest.conn.sendall("306 "+ self.nom + " " + argument[len(dest.nom)+1:])
+                return "205"
+            return "403"
 
         if(commande == "askpm"):
             dest = Client.getByName(argument.split(" ")[0])
@@ -132,10 +121,10 @@ class Client:
                 d = dest.getDiscussionEnAttenteFrom(self)
                 if not d:
                     dest.discussionEnAttente.append(self)
-                    dest.conn.sendall("ASKING_FOR_PM " + self.nom)
-                    return "SUCCESSFUL_ASKED"
-                return "ERR_ALREADY_ASKED"
-            return "ERR_DEST_NOT_FOUND"
+                    dest.conn.sendall("307 " + self.nom)
+                    return "206"
+                return "404"
+            return "403"
 
         if(commande == "acceptpm"):
             dest = Client.getByName(argument.split(" ")[0])
@@ -145,11 +134,10 @@ class Client:
                 if d:
                     self.discussionEnAttente.remove(dest)
                     Client.discussionOuverte.append([self, dest])
-                    #todo envoyer un message à l'autre
-                    d.conn.sendall("PRIVATE_DISCU_ACCEPTED_FROM " + self.nom)
-                    return "SUCCESSFUL_ACCEPTED"
-                return "ERR_NO_INVITATION_FOUND"
-            return "ERR_DEST_NOT_FOUND"
+                    d.conn.sendall("308 " + self.nom)
+                    return "207"
+                return "405"
+            return "403"
 
         if(commande == "rejectpm"):
             dest = Client.getByName(argument.split(" ")[0])
@@ -158,58 +146,80 @@ class Client:
                 if d:
                     self.discussionEnAttente.remove(dest)
                     # todo arreter une connexion deja ouverte
-                    d.conn.sendall("PRIVATE_DISCU_REFUSED_FROM" + self.nom)
-                    return "SUCCESSFUL_REFUSED"
-                return "ERR_NO_INVITATION_FOUND"
-            return "ERR_DEST_NOT_FOUND"
+                    d.conn.sendall("309" + self.nom)
+                    return "208"
+                return "405"
+            return "403"
 
         if(commande == "enable"):
             self.actif = True
             for c in Client.tous:
                 if c != self:
-                    c.conn.sendall("IS_NOW_ENABLE "+self.nom)
-            return "SUCC_ENABLED"
+                    c.conn.sendall("310 "+self.nom)
+            return "209"
+
         if(commande == "disable"):
             self.actif = False
             for c in Client.tous:
                 if c != self:
-                    c.conn.sendall("IS_NOW_DISABLE "+self.nom)
-            return "SUCC_DISABLED"
+                    c.conn.sendall("311 "+self.nom)
+            return "210"
 
         if(commande == "pmfile"):
 
             arguments = argument.split(" ")
             dest = Client.getByName(arguments[0])
             path = argument[len(arguments[0])+1:]
-            # todo : already proposed this file
+            # todo FACULTATIF : already proposed this file
             if dest and path:
                 Client.propositionFichiers.append([self, dest, path])
-                dest.conn.sendall("NEW_FILE_REQUEST "+self.nom + " "+path)
-                return "SUCC_PMFILE"
-            return "ERR_DEST_NOT_FOUND"
+                dest.conn.sendall("312 "+self.nom + " "+path)
+                return "211"
+            return "403"
 
         if(commande == "acceptfile"):
             arguments = argument.split(" ")
             dest = Client.getByName(arguments[0])
             port = arguments[1]
             path = argument[len(arguments[0])+len(arguments[1])+2:]
-            print(Client.propositionFichiers)
             l=[dest, self, path]
-            print(l)
-
-            if l in Client.propositionFichiers:
+            if l in Client.propositionFichiers and port:
                 Client.propositionFichiers.remove(l)
                 if port:
                     ip = self.conn.getpeername()[0]
-                    print(ip)
-                    dest.conn.sendall("START_TRANSFERT "+dest.nom+" "+port+" "+ip+" "+path)
-                    print("IP TF : " + self.conn.gethostbyname(self.conn.gethostname()))
-                    return "SUCC_ACCEPTED_FILE"
-                # Client.propositionFichiers.remove(..)
+                    dest.conn.sendall("313 "+dest.nom+" "+port+" "+ip+" "+path)
+                    return "212"
+                else: return "407"
+            return "406"
 
-            return "ERR_UNKNOWN_ACCEPTED_FILE"
+        if(commande == "rejectfile"):
+            arguments = argument.split(" ")
+            dest = Client.getByName(arguments[0])
+            path = argument[len(arguments[0])+len(arguments[1])+2:]
+            l=[dest, self, path]
+            if l in Client.propositionFichiers:
+                Client.propositionFichiers.remove(l)
+                dest.conn.sendall("314 "+dest.nom+" "+path)
+                return "213"
+            return "406"
 
-        return "COMMAND_NOT_FOUND"
+        if(commande == "userlistaway"):
+            clientListAway = ""
+            for c in Client.tous:
+                if not c.actif:
+                    clientListAway += " " + c.nom
+            self.conn.sendall("301" + clientListAway)
+
+        if(commande == "userlist"):
+            clientList = ""
+            for c in Client.tous:
+                if c.actif:
+                    clientList += " " + c.nom
+            self.conn.sendall("300" + clientList)
+
+
+
+        return "407"
 
     @staticmethod
     def getByName(nom):
