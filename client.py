@@ -146,7 +146,7 @@ class Client:
                     self.discussionEnAttente.remove(dest)
                     Client.discussionOuverte.append([self, dest])
                     #todo envoyer un message à l'autre
-                    d.conn.sendall("PRIVATE_DISCU_ACCEPTED_FROM" + self.nom)
+                    d.conn.sendall("PRIVATE_DISCU_ACCEPTED_FROM " + self.nom)
                     return "SUCCESSFUL_ACCEPTED"
                 return "ERR_NO_INVITATION_FOUND"
             return "ERR_DEST_NOT_FOUND"
@@ -180,7 +180,7 @@ class Client:
 
             arguments = argument.split(" ")
             dest = Client.getByName(arguments[0])
-            path = argument[len(Client.getByName(arguments[0]))+1:]
+            path = argument[len(arguments[0])+1:]
             # todo : already proposed this file
             if dest and path:
                 Client.propositionFichiers.append([self, dest, path])
@@ -191,12 +191,23 @@ class Client:
         if(commande == "acceptfile"):
             arguments = argument.split(" ")
             dest = Client.getByName(arguments[0])
-            path = Client.getByName(arguments[1])
-            port = Client.getByName(arguments[2])
-            if Client.propositionFichiers.pop([Client.propositionFichiers.index([dest, self, path])]):
-                return "START_TRANSFERT PERSON FILE"
-            # Client.propositionFichiers.remove(..)
-            return "SUCC_ACCEPTED_FILE"
+            port = arguments[1]
+            path = argument[len(arguments[0])+len(arguments[1])+2:]
+            print(Client.propositionFichiers)
+            l=[dest, self, path]
+            print(l)
+
+            if l in Client.propositionFichiers:
+                Client.propositionFichiers.remove(l)
+                if port:
+                    ip = self.conn.getpeername()[0]
+                    print(ip)
+                    dest.conn.sendall("START_TRANSFERT "+dest.nom+" "+port+" "+ip+" "+path)
+                    print("IP TF : " + self.conn.gethostbyname(self.conn.gethostname()))
+                    return "SUCC_ACCEPTED_FILE"
+                # Client.propositionFichiers.remove(..)
+
+            return "ERR_UNKNOWN_ACCEPTED_FILE"
 
         return "COMMAND_NOT_FOUND"
 
