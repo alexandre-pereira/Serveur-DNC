@@ -208,15 +208,13 @@ class Client:
             for c in Client.tous:
                 if not c.actif:
                     clientListAway += " " + c.nom
-            self.conn.sendall("301" + clientListAway)
-
+            return "301" + clientListAway
         if(commande == "userlist"):
             clientList = ""
             for c in Client.tous:
                 if c.actif:
                     clientList += " " + c.nom
-            self.conn.sendall("300" + clientList)
-
+            return "300" + clientList
 
 
         return "407"
