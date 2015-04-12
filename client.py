@@ -195,7 +195,7 @@ class Client:
         if(commande == "rejectfile"):
             arguments = argument.split(" ")
             dest = Client.getByName(arguments[0])
-            path = argument[len(arguments[0])+len(arguments[1])+2:]
+            path = argument[len(arguments[0])+1:]
             l=[dest, self, path]
             if l in Client.propositionFichiers:
                 Client.propositionFichiers.remove(l)
