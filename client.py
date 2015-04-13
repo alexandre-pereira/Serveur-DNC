@@ -152,6 +152,7 @@ class Client:
             return "403"
 
         if(commande == "enable"):
+            if self.actif: return "410"
             self.actif = True
             for c in Client.tous:
                 if c != self:
@@ -159,6 +160,7 @@ class Client:
             return "209"
 
         if(commande == "disable"):
+            if not self.actif: return "411"
             self.actif = False
             for c in Client.tous:
                 if c != self:
