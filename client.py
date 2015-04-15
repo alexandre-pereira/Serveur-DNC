@@ -189,7 +189,7 @@ class Client:
                 Client.propositionFichiers.remove(l)
                 if port:
                     ip = self.ip
-                    dest.conn.sendall("313 "+dest.nom+" "+ip+" "+port+" "+path)
+                    dest.conn.sendall("313 "+self.nom+" "+ip+" "+port+" "+path)
                     return "212 " + dest.ip
                 else: return "407"
             return "406"
@@ -217,8 +217,6 @@ class Client:
                 if c.actif:
                     clientList += " " + c.nom
             return "300" + clientList
-
-
         return "407"
 
     @staticmethod
