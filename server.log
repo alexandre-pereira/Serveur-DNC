@@ -235,3 +235,39 @@
 2015-04-10 17:33:13,002 :: Alex :: /acceptfile ttt 3333 test.txt
 2015-04-11 00:03:35,026 :: Serveur lancé
 2015-04-11 00:03:36,076 :: Serveur lancé
+2015-04-15 09:23:14,381 :: Serveur lancé
+2015-04-15 09:23:56,740 :: bob :: /userlist
+2015-04-15 09:23:56,743 :: bob :: /userlistaway
+2015-04-15 09:24:44,670 :: rere :: /userlist
+2015-04-15 09:24:44,671 :: rere :: /userlistaway
+2015-04-15 09:24:52,453 :: rere :: coucou :pedobear
+2015-04-15 09:25:00,473 :: bob :: test :homer
+2015-04-15 09:25:05,151 :: bob :: /askpm rere
+2015-04-15 09:25:08,644 :: rere :: /acceptpm bob
+2015-04-15 09:25:10,983 :: rere :: /pm bob coucou !
+2015-04-15 09:25:17,993 :: bob :: /pm rere ça va ????
+2015-04-15 09:25:26,213 :: bob :: /disable
+2015-04-15 09:25:26,214 :: rere :: /userlist
+2015-04-15 09:25:26,216 :: bob :: /userlist
+2015-04-15 09:25:26,217 :: rere :: /userlistaway
+2015-04-15 09:25:26,217 :: bob :: /userlistaway
+2015-04-15 09:25:35,326 :: rere :: coucou !
+2015-04-15 09:25:40,779 :: bob :: /enable
+2015-04-15 09:25:40,782 :: rere :: /userlist
+2015-04-15 09:25:40,782 :: bob :: /userlist
+2015-04-15 09:25:40,783 :: rere :: /userlistaway
+2015-04-15 09:25:40,783 :: bob :: /userlistaway
+2015-04-15 09:25:53,088 :: rere :: /pmfile bob /home/renan/Images/homerRasta.jpg
+2015-04-15 09:25:54,674 :: bob :: /acceptfile rere 9158 /home/renan/Images/homerRasta.jpg
+2015-04-15 09:27:17,607 :: bob :: /userlist
+2015-04-15 09:27:33,303 :: Serveur lancé
+2015-04-15 09:27:58,299 :: bob :: /userlist
+2015-04-15 09:27:58,301 :: bob :: /userlistaway
+2015-04-15 09:28:19,273 :: rere :: /userlist
+2015-04-15 09:28:19,278 :: rere :: /userlistaway
+2015-04-15 09:28:28,973 :: rere :: /pmfile bob /home/renan/Images/homerRasta.jpg
+2015-04-15 09:28:30,467 :: bob :: /acceptfile rere 9474 /home/renan/Images/homerRasta.jpg
+2015-04-15 09:29:30,303 :: Alex :: /userlist
+2015-04-15 09:29:34,267 :: Alex :: /userlistaway
+2015-04-15 09:29:48,137 :: bob :: /userlist
+2015-04-15 09:32:11,770 :: Serveur lancé

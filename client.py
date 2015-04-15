@@ -10,10 +10,10 @@ class Client:
     discussionOuverte = [] # Qui est autorisé à parler avec qui - 0: client, 1: client
     propositionFichiers = [] # TODO : contient ClientEmetteur, ClientRecepteur, Chemin du fichier
 
-    def __init__(self, pconn):
-
-        self.conn = pconn;
-        self.nom = None;
+    def __init__(self, pconn, pip):
+        self.ip = pip
+        self.conn = pconn
+        self.nom = None
         self.actif = True
         self.discussionEnAttente = []
         start_new_thread(self.wait4name, ())
@@ -188,9 +188,9 @@ class Client:
             if l in Client.propositionFichiers and port:
                 Client.propositionFichiers.remove(l)
                 if port:
-                    ip = self.conn.getpeername()[0]
-                    dest.conn.sendall("313 "+dest.nom+" "+port+" "+ip+" "+path)
-                    return "212"
+                    ip = self.ip
+                    dest.conn.sendall("313 "+dest.nom+" "+ip+" "+port+" "+path)
+                    return "212 " + dest.ip
                 else: return "407"
             return "406"
 

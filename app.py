@@ -28,7 +28,7 @@ Logger.logger.info("Serveur lancé")
 while True:
     conn, addr = s.accept()
     print("Connecte a " + addr[0] + ":" + str(addr[1]))
-    c = Client(conn)
+    c = Client(conn, addr[0])
 
 
 s.close()
