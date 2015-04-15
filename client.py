@@ -201,7 +201,7 @@ class Client:
             l=[dest, self, path]
             if l in Client.propositionFichiers:
                 Client.propositionFichiers.remove(l)
-                dest.conn.sendall("314 "+dest.nom+" "+path)
+                dest.conn.sendall("314 "+self.nom+" "+path)
                 return "213"
             return "406"
 

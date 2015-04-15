@@ -271,3 +271,13 @@
 2015-04-15 09:29:34,267 :: Alex :: /userlistaway
 2015-04-15 09:29:48,137 :: bob :: /userlist
 2015-04-15 09:32:11,770 :: Serveur lancé
+2015-04-15 09:32:47,482 :: bob :: /userlist
+2015-04-15 09:32:47,483 :: bob :: /userlistaway
+2015-04-15 09:33:04,477 :: rere :: /userlist
+2015-04-15 09:33:04,480 :: rere :: /userlistaway
+2015-04-15 09:33:12,450 :: Alex :: /userlist
+2015-04-15 09:33:13,220 :: rere :: /pmfile bob /home/renan/Images/homerRasta.jpg
+2015-04-15 09:33:14,079 :: bob :: /acceptfile rere 3461 /home/renan/Images/homerRasta.jpg
+2015-04-15 09:33:15,752 :: Alex :: /userlistaway
+2015-04-15 09:33:18,559 :: Alex :: coucou
+2015-04-15 09:33:43,454 :: rere :: /userlist
