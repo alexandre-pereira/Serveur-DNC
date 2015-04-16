@@ -20,10 +20,10 @@ class Client:
 
     def initco(self):
         for c in Client.tous:
-            c.conn.sendall("302 "+ self.nom)
+            c.conn.send("302 "+ self.nom)
 
         Client.tous.append(self)
-        self.conn.sendall("200")
+        self.conn.send("200")
         start_new_thread(self.client_thread, ())
 
     def wait4name(self):
@@ -47,14 +47,14 @@ class Client:
             if commande == "/newname":
                 name = data[len(commande)+1:]
                 if Client.getByName(name) != None:
-                    self.conn.sendall("400")
+                    self.conn.send("400")
                     continue
                 if re.match("^\w{3,15}$", name):
                     self.nom = name
                     self.initco()
                     break
-                else: self.conn.sendall("408")
-            else: self.conn.sendall("401")
+                else: self.conn.send("408")
+            else: self.conn.send("401")
         if disconnected:
             self.conn.close()
 
@@ -71,24 +71,24 @@ class Client:
             Logger.logger.info(self.nom +" :: " +data)
 
             if data == "/quit":
-                self.conn.sendall("201")
+                self.conn.send("201")
                 break
 
             if data[0] == '/': #c'est une commande spéciale
                 reponse = self.getReply(data[1:])
             else: #c'est un message à envoyer à tous les clients actifs
                 for c in Client.tous:
-                    if c!=self: c.conn.sendall("304 "+ self.nom + " " + data)
+                    if c!=self: c.conn.send("304 "+ self.nom + " " + data)
                 reponse = "202"
 
             if reponse:
-                self.conn.sendall(reponse)
+                self.conn.send(reponse)
 
 
         #EXIT
         Client.tous.remove(self)
         for c in Client.tous:
-            c.conn.sendall("303 "+ self.nom)
+            c.conn.send("303 "+ self.nom)
         self.conn.close()
         # todo: nettoyer listes transfert fichiers + acceptpm
 
@@ -103,7 +103,7 @@ class Client:
                 self.nom = argument
                 for c in Client.tous:
                     if c != self:
-                        c.conn.sendall("305 "+ancienNom+" "+self.nom)
+                        c.conn.send("305 "+ancienNom+" "+self.nom)
                 return "203 " + self.nom
             return "408"
 
@@ -111,7 +111,7 @@ class Client:
             dest = Client.getByName(argument.split(" ")[0])
             if dest:
                 if not Client.isDiscussionOuverte(dest, self): return "402"
-                dest.conn.sendall("306 "+ self.nom + " " + argument[len(dest.nom)+1:])
+                dest.conn.send("306 "+ self.nom + " " + argument[len(dest.nom)+1:])
                 return "205"
             return "403"
 
@@ -121,7 +121,7 @@ class Client:
                 d = dest.getDiscussionEnAttenteFrom(self)
                 if not d:
                     dest.discussionEnAttente.append(self)
-                    dest.conn.sendall("307 " + self.nom)
+                    dest.conn.send("307 " + self.nom)
                     return "206"
                 return "404"
             return "403"
@@ -134,7 +134,7 @@ class Client:
                 if d:
                     self.discussionEnAttente.remove(dest)
                     Client.discussionOuverte.append([self, dest])
-                    d.conn.sendall("308 " + self.nom)
+                    d.conn.send("308 " + self.nom)
                     return "207"
                 return "405"
             return "403"
@@ -146,7 +146,7 @@ class Client:
                 if d:
                     self.discussionEnAttente.remove(dest)
                     # todo arreter une connexion deja ouverte
-                    d.conn.sendall("309" + self.nom)
+                    d.conn.send("309" + self.nom)
                     return "208"
                 return "405"
             return "403"
@@ -156,7 +156,7 @@ class Client:
             self.actif = True
             for c in Client.tous:
                 if c != self:
-                    c.conn.sendall("310 "+self.nom)
+                    c.conn.send("310 "+self.nom)
             return "209"
 
         if(commande == "disable"):
@@ -164,7 +164,7 @@ class Client:
             self.actif = False
             for c in Client.tous:
                 if c != self:
-                    c.conn.sendall("311 "+self.nom)
+                    c.conn.send("311 "+self.nom)
             return "210"
 
         if(commande == "pmfile"):
@@ -175,7 +175,7 @@ class Client:
             # todo FACULTATIF : already proposed this file
             if dest and path:
                 Client.propositionFichiers.append([self, dest, path])
-                dest.conn.sendall("312 "+self.nom + " "+path)
+                dest.conn.send("312 "+self.nom + " "+path)
                 return "211"
             return "403"
 
@@ -189,7 +189,7 @@ class Client:
                 Client.propositionFichiers.remove(l)
                 if port:
                     ip = self.ip
-                    dest.conn.sendall("313 "+self.nom+" "+ip+" "+port+" "+path)
+                    dest.conn.send("313 "+self.nom+" "+ip+" "+port+" "+path)
                     return "212 " + dest.ip
                 else: return "407"
             return "406"
@@ -201,7 +201,7 @@ class Client:
             l=[dest, self, path]
             if l in Client.propositionFichiers:
                 Client.propositionFichiers.remove(l)
-                dest.conn.sendall("314 "+self.nom+" "+path)
+                dest.conn.send("314 "+self.nom+" "+path)
                 return "213"
             return "406"
 
